@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {
-  HashRouter, Route, Switch
+  HashRouter, Redirect, Route, Switch,
 } from 'react-router-dom';
 import {
   Grid, Typography, Paper
@@ -20,9 +20,10 @@ class PhotoShare extends React.Component {
     super(props);
     this.state = {
       isLoggedIn: false,
+      userID: '',
     };
   }
-
+  
   render() {
     return (
       <HashRouter>
@@ -42,25 +43,61 @@ class PhotoShare extends React.Component {
               <Route path="/users"> 
                 <TopBar/>
               </Route>
+              <Route path="/login-register"> 
+                <TopBar/>
+              </Route>
           </Switch>
         </Grid>
         <div className="cs142-main-topbar-buffer"/>
         <Grid item sm={3}>
           <Paper className="cs142-main-grid-item">
-            <UserList />
+            <UserList loginStatus={this.state.isLoggedIn} />
           </Paper>
         </Grid>
-        <Grid item sm={9}>
+        <Grid item sm={9}> 
           <Paper className="cs142-main-grid-item">
             <Switch>
-              <Route exact path="/" component={LoginRegister}  />
-              <Route path="/users/:userId"
-                render={ props => <UserDetail {...props} /> }
-              />
-              <Route path="/photos/:userId"
-                render ={ props => <UserPhotos {...props} /> }
-              />
-              <Route path="/users" component={UserList}  />
+              {
+                this.state.isLoggedIn ?
+                <Route exact path="/" />
+                  :
+                <Redirect exact path="/" to="/login-register" />
+              }
+              {
+                  this.state.isLoggedIn ?
+                  <Route path="/users/:userId"
+                  render={ props => <UserDetail {...props} /> }
+                />
+                  :
+                  <Redirect path="/users/:userId" to="/login-register" />
+              }
+              {
+                  this.state.isLoggedIn ?
+                  <Route path="/photos/:userId"
+                  render ={ props => <UserPhotos {...props} /> }
+                />
+                  :
+                  <Redirect path="/photos/:userId" to="/login-register" />
+              }
+              {
+                this.state.isLoggedIn ?
+                <Route path="/users" component={UserList}  />
+                  :
+                <Redirect path="/users" to="/login-register" />
+              }
+              {
+                this.state.isLoggedIn ?
+                <Redirect path="/login-register" to= {`/users/${this.state.userID}`}/>
+                :
+                <Route path="/login-register"
+                render={ props => 
+                  <LoginRegister tellStatus={(loggedStatus, userID) => {
+                    this.setState({
+                      isLoggedIn: loggedStatus,
+                      userID: userID,
+                    });
+                  } } /> }  />
+              }
             </Switch>
           </Paper>
         </Grid>

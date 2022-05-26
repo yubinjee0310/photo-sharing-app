@@ -131,6 +131,11 @@ app.get('/test/:p1', function (request, response) {
  * URL /user/list - Return all the User object.
  */
 app.get('/user/list', function (request, response) {
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('Invalid user');
+        return;
+    }
     User.find().select('first_name last_name').exec((err, userArray) => {
         if (err) {
             // Query returned an error.  We pass it back to the browser with an Internal Service
@@ -147,6 +152,11 @@ app.get('/user/list', function (request, response) {
  * URL /user/:id - Return the information for User (id)
  */
 app.get('/user/:id', function (request, response) {
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('Invalid user');
+        return;
+    }
     const id = request.params.id;
     User.findOne({_id: id}).select('first_name last_name location description occupation').exec((err, user) => {
         if (err) {
@@ -162,6 +172,11 @@ app.get('/user/:id', function (request, response) {
  * URL /photosOfUser/:id - Return the Photos for User (id)
  */
 app.get('/photosOfUser/:id', function (request, response) {
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('Invalid user');
+        return;
+    }
     const id = request.params.id;
     Photo.find({user_id: id}).select('user_id comments file_name date_time').exec((err, photos) => {
         if (err) {
@@ -204,22 +219,17 @@ app.get('/photosOfUser/:id', function (request, response) {
 app.post('/admin/login', function (request, response) {
     const loginName = request.body.login_name; 
     User.findOne({login_name: loginName}).exec((err, user) => {
-        if (err) {
+        if (err || !user) {
             console.log('User with login_name:' + loginName + ' not found.');
             response.status(400).send('User with login name not found');
             return; 
         }
-        if (user == undefined) {
-            console.log('User not found.')
-            response.status(400).send('Not found');
-            return;
-        }
         //mark session as being logged in 
         request.session.user_id = user._id;
         request.session.login_name = loginName;
-        request.session
         response.status(200).send({
             _id: user._id, 
+            first_name: user.first_name,
         });
     });
     
@@ -231,9 +241,9 @@ app.post('/admin/logout', function(request, response) {
         response.status(400).send('Not logged in.');
     } else {
         sessionData.destroy(function(err) {
-            response.status(400).send("Successfully logged out.");
+            response.status(200).send("Successfully logged out.");
             return;
-        })
+        });
     }
 });
 //ability to add comments
@@ -257,11 +267,19 @@ app.post('/commentsOfPhoto/:photo_id', function(request, response) {
 })
 //ability to upload photos 
 app.post('/photos/new', function(request, response) {
-
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('Invalid user');
+        return;
+    }
 })
 //ability to register 
 app.post('/user', function(request, response) {
-
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('Invalid user');
+        return;
+    }
 })
 
 var server = app.listen(3000, function () {

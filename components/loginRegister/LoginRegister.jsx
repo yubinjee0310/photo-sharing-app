@@ -7,7 +7,11 @@ import axios from 'axios';
 class LoginRegister extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {loginName: ""};
+        this.state = {
+            loginName: '',
+            failed: false,
+        };
+        this.tellStatus = props.tellStatus;
     }
 
     handleChange(event) { //keep track of whatever text in loginName 
@@ -17,9 +21,14 @@ class LoginRegister extends React.Component {
         event.preventDefault();
         axios.post("/admin/login", {
             login_name: this.state.loginName,
-        }).then(function(response) {
-            console.log(response);    
-        })
+        }).then((response) => {
+            console.log(response);
+            this.tellStatus(true, response.data._id);
+        }).catch((error) => {
+            this.setState({
+                failed: true,
+            });
+        });
     }
 
     render() {
@@ -31,6 +40,9 @@ class LoginRegister extends React.Component {
                                        onChange={e => this.handleChange(e)}/>   
                 </label>
                 <input type="submit" value="Submit" />
+                <p>
+                    {this.state.failed ? "Failed Login attempt. Try again.": ""}
+                </p>
             </form>
         )
     }
