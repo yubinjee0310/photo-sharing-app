@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AppBar, Toolbar, Typography, 
+  AppBar, Toolbar, Typography, Button,
 } from '@material-ui/core';
 import './TopBar.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
@@ -16,6 +16,7 @@ class TopBar extends React.Component {
       user: {},
       version: 0,
     };
+    this.tellStatus = props.tellStatus;
   }
   componentDidMount() {
     if (this.props.userId !== undefined){
@@ -45,27 +46,44 @@ class TopBar extends React.Component {
       });
     }
   }
+
+  handleLogout() {
+    axios.post("/admin/logout", {}).then((response) => {
+        this.tellStatus(false, "", "");
+    });
+  }
   render() {
     return (
       <HashRouter>
         <AppBar className="cs142-topbar-appBar" position="absolute">
           <Toolbar className="toolbar">
             <Typography variant="h5" color="inherit">
-              Yubin Jee
+              {this.props.loginStatus ?  "Hi " + this.props.firstName : ""}
             </Typography>
             <Typography variant="h5" color="inherit">
               Version: {this.state.version}
             </Typography>
             <Typography variant="h5" color="inherit">
-              <Switch>
-                <Route path="/users/:userId">
-                  {`${this.state.user.first_name} ${this.state.user.last_name}`}
-                </Route>
-                <Route path="/photos/:userId">
-                  Photos of {`${this.state.user.first_name} ${this.state.user.last_name}`}
-                </Route>
-              </Switch>
+              {this.props.loginStatus ? 
+                <Switch>
+                  <Route path="/users/:userId">
+                    {`${this.state.user.first_name} ${this.state.user.last_name}`}
+                  </Route>
+                  <Route path="/photos/:userId">
+                    Photos of {`${this.state.user.first_name} ${this.state.user.last_name}`}
+                  </Route>
+                </Switch>
+              :
+                "Please log in"
+              }
             </Typography>
+            {this.props.loginStatus ? 
+              <Button variant="contained" onClick={e => this.handleLogout()}>
+                Log Out
+              </Button>
+              :
+              null
+            }
           </Toolbar>
         </AppBar>
       </HashRouter>

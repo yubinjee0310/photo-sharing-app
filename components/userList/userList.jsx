@@ -38,6 +38,9 @@ class UserList extends React.Component {
           userList: res.data,
         });
       }).catch((error) => {
+        this.setState({
+          userList: [],
+        });
         console.log(error);
       });
     }

@@ -22,8 +22,7 @@ class LoginRegister extends React.Component {
         axios.post("/admin/login", {
             login_name: this.state.loginName,
         }).then((response) => {
-            console.log(response);
-            this.tellStatus(true, response.data._id);
+            this.tellStatus(true, response.data._id, response.data.first_name);
         }).catch((error) => {
             this.setState({
                 failed: true,
@@ -35,7 +34,7 @@ class LoginRegister extends React.Component {
         return (
             <form onSubmit={e => this.handleSubmit(e)}>
                 <label>
-                    Login Name: <input type = "text" 
+                    Login Name: <input type="text" 
                                        value={this.state.loginName} 
                                        onChange={e => this.handleChange(e)}/>   
                 </label>
