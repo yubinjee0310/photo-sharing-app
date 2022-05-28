@@ -325,11 +325,10 @@ app.post('/photos/new', function(request, response) {
 });
 //ability to register 
 app.post('/user', function(request, response) {
-    const loginName = request.body.registerName;
-    const password1 = request.body.registerPassword;
-    const password2 = request.body.registerPassword2;
-    const firstName = request.body.firstName;
-    const lastName = request.body.lastName;
+    const loginName = request.body.login_name;
+    const registrationPass = request.body.password;
+    const firstName = request.body.first_name;
+    const lastName = request.body.last_name;
     const location = request.body.location;
     const description = request.body.description;
     const occupation = request.body.occupation;
@@ -337,13 +336,9 @@ app.post('/user', function(request, response) {
         response.status(400).send('Register Name cannot be empty.');
         return; 
     }
-    if (password1.length === 0) {
+    if (registrationPass.length === 0) {
         response.status(400).send('Password cannot be empty.');
         return; 
-    }
-    if (password1 !== password2) {
-        response.status(400).send('The passwords are not matching.');
-        return;
     }
     if (firstName.length === 0) {
         response.status(400).send('First Name cannot be empty.');
@@ -365,7 +360,7 @@ app.post('/user', function(request, response) {
         }
         User.create({
             login_name: loginName, 
-            password: password1, 
+            password: registrationPass, 
             first_name: firstName, 
             last_name: lastName, 
             location: location, 

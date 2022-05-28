@@ -44,12 +44,17 @@ class LoginRegister extends React.Component {
 
     handleRegister(event) {
         event.preventDefault();
+        if (this.state.registerPassword !== this.state.registerPassword2) {
+            this.setState({
+                registrationError: "The passwords are not matching.",
+            });
+            return;
+        }
         axios.post("user", {
-            registerName: this.state.registerName,
-            registerPassword: this.state.registerPassword,
-            registerPassword2: this.state.registerPassword2,
-            firstName: this.state.firstName,
-            lastName: this.state.lastName,
+            login_name: this.state.registerName,
+            password: this.state.registerPassword,
+            first_name: this.state.firstName,
+            last_name: this.state.lastName,
             location: this.state.location,
             description: this.state.description,
             occupation: this.state.occupation,
