@@ -325,34 +325,59 @@ app.post('/photos/new', function(request, response) {
 });
 //ability to register 
 app.post('/user', function(request, response) {
-    const password = request.body.password;
-    if (password.length() === 0) {
-        response.status(400).send('Password cannot be empty.')
+    const loginName = request.body.registerName;
+    const password1 = request.body.registerPassword;
+    const password2 = request.body.registerPassword2;
+    const firstName = request.body.firstName;
+    const lastName = request.body.lastName;
+    const location = request.body.location;
+    const description = request.body.description;
+    const occupation = request.body.occupation;
+    if (loginName.length === 0) {
+        response.status(400).send('Register Name cannot be empty.');
         return; 
     }
-    const loginName = request.body.login_name;
-    User.findOne({login_name: loginName}, function(err, user) {
+    if (password1.length === 0) {
+        response.status(400).send('Password cannot be empty.');
+        return; 
+    }
+    if (password1 !== password2) {
+        response.status(400).send('The passwords are not matching.');
+        return;
+    }
+    if (firstName.length === 0) {
+        response.status(400).send('First Name cannot be empty.');
+        return; 
+    }
+    if (lastName.length === 0) {
+        response.status(400).send('Last Name cannot be empty.');
+        return; 
+    }
+    User.find({login_name: loginName}, function(err, users) {
         if (err) {
             response.status(400).send('Username verification failed.');
             return;
         }
-        if (user.length >= 0) {
+        if (users.length > 0) {
+            console.log(users);
             response.status(400).send('Username already exists.');
             return;
         }
-
-        const firstName = request.body.first_name;
-        const lastName = request.body.last_name;
-        const location = request.body.location;
-        const description = request.body.description;
-        const occupation = request.body.occupation;
-
-        User.create(loginName, password, firstName, lastName, location, description, occupation, function(err) {
+        User.create({
+            login_name: loginName, 
+            password: password1, 
+            first_name: firstName, 
+            last_name: lastName, 
+            location: location, 
+            description: description, 
+            occupation: occupation
+        }, function(err) {
             if (err) {
-                response.status(400).send(JSON.stringify(error));
+                response.status(400).send(JSON.stringify(err));
+                console.log(JSON.stringify(err));
                 return;
             }
-            response.status(200).send('User registeration successful.')
+            response.status(200).send('User registration successful.')
         })
 
     })
