@@ -5,6 +5,8 @@ import {
 import './TopBar.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import axios from 'axios';
+import StateManager from '../../lib/stateManager';
+import { ThreeSixtyTwoTone } from '@material-ui/icons';
 
 /**
  * Define TopBar, a React componment of CS142 project #5
@@ -49,9 +51,24 @@ class TopBar extends React.Component {
 
   handleLogout() {
     axios.post("/admin/logout", {}).then((response) => {
-        this.tellStatus(false, "", "");
+      this.tellStatus(false, "", "");
     });
   }
+
+  handleUploadButtonClicked = () => {
+    if (this.uploadInput.files.length > 0) {
+      // Create a DOM form and add the file to it under the name uploadedphoto
+      const domForm = new FormData();
+      domForm.append('uploadedphoto', this.uploadInput.files[0]);
+      axios.post('/photos/new', domForm)
+        .then((res) => {
+            console.log(res);
+            this.props.stateManager.notify("photoupload");
+        })
+        .catch(err => console.log(`POST ERR: ${err}`));
+ }
+}
+
   render() {
     return (
       <HashRouter>
@@ -80,6 +97,23 @@ class TopBar extends React.Component {
             {this.props.loginStatus ? 
               <Button variant="contained" onClick={e => this.handleLogout()}>
                 Log Out
+              </Button>
+              :
+              null
+            }
+            {
+              this.props.loginStatus && (
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={(domFileRef) => {
+                   this.uploadInput = domFileRef; 
+                }} 
+              />
+            )}
+            {this.props.loginStatus ? 
+              <Button variant="contained" onClick={() => this.handleUploadButtonClicked()}>
+                Add Photo
               </Button>
               :
               null

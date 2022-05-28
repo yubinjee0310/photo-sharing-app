@@ -1,7 +1,4 @@
 import React from 'react';
-import {
-    TextField, Button
-} from '@material-ui/core';
 import axios from 'axios';
 
 class LoginRegister extends React.Component {
@@ -10,6 +7,7 @@ class LoginRegister extends React.Component {
         this.state = {
             loginName: '',
             failed: false,
+            password: '',
         };
         this.tellStatus = props.tellStatus;
     }
@@ -17,10 +15,12 @@ class LoginRegister extends React.Component {
     handleChange(event) { //keep track of whatever text in loginName 
         this.setState({loginName: event.target.value});
     }
-    handleSubmit(event) {
+
+    handleLogin(event) {
         event.preventDefault();
         axios.post("/admin/login", {
             login_name: this.state.loginName,
+            password: this.state.password,
         }).then((response) => {
             this.tellStatus(true, response.data._id, response.data.first_name);
         }).catch((error) => {
@@ -30,19 +30,40 @@ class LoginRegister extends React.Component {
         });
     }
 
+    handleRegister(event) {
+        event.preventDefault();
+        axios.post("user", {
+            login_name: this.state.loginName,
+            password: this.state.password, 
+        }).then((response) => {
+            this.tellStatus(true, response.data._id, response.data.first_name);
+        }).catch((error) => {
+            this.setState({
+                failed: true,
+            });
+        });
+    }
     render() {
         return (
-            <form onSubmit={e => this.handleSubmit(e)}>
-                <label>
-                    Login Name: <input type="text" 
-                                       value={this.state.loginName} 
-                                       onChange={e => this.handleChange(e)}/>   
-                </label>
-                <input type="submit" value="Submit" />
-                <p>
-                    {this.state.failed ? "Failed Login attempt. Try again.": ""}
-                </p>
-            </form>
+            <div>
+                <form onSubmit={e => this.handleLogin(e)}>
+                    <label>
+                        Login Name: <input type="text" 
+                                        value={this.state.loginName} 
+                                        onChange={e => this.handleChange(e)}/>   
+                    </label>
+                    <input type="submit" value="Submit" />
+                    <p>
+                        {this.state.failed ? "Failed Login attempt. Try again.": ""}
+                    </p>
+                </form>
+                <form onSubmit={e => this.handleRegister(e)}>
+                    <label> 
+
+                    </label>
+                </form>
+            </div>
+
         )
     }
 }

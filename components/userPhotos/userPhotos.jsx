@@ -7,6 +7,8 @@ import {
 import './userPhotos.css';
 import { Link } from "react-router-dom";
 import axios from 'axios';
+import AddComments from './addComments';
+import StateManager from '../../lib/stateManager';
 
 /**
  * Define UserPhotos, a React componment of CS142 project #5
@@ -17,8 +19,20 @@ class UserPhotos extends React.Component {
     this.state = {
       photos: [],
     };
+    this.props.stateManager.register(this, "photoupload");
   }
   componentDidMount() {
+    this.reloadData();
+  }
+  componentDidUpdate(prevProps) {
+    if (this.props.match.params.userId !== prevProps.match.params.userId) {
+      this.reloadData();
+    }
+  }
+  notifyEvent(eventType) {
+    this.reloadData();
+  }
+  reloadData() {
     axios.get(`/photosOfUser/${this.props.match.params.userId}`).then((res) => {
       this.setState({
         photos: res.data,
@@ -26,17 +40,6 @@ class UserPhotos extends React.Component {
     }).catch((error) => {
       console.log(error);
     });
-  }
-  componentDidUpdate(prevProps) {
-    if (this.props.match.params.userId !== prevProps.match.params.userId) {
-      axios.get(`/photosOfUser/${this.props.match.params.userId}`).then((res) => {
-        this.setState({
-          photos: res.data,
-        });
-      }).catch((error) => {
-        console.log(error);
-      });
-    }
   }
   render() {
     return (
@@ -74,6 +77,7 @@ class UserPhotos extends React.Component {
                     </Typography>
                   </div>
               ))}
+              <AddComments photoID={photo._id} reloadData={() => this.reloadData()} />
             </React.Fragment>
           ))}
         </React.Fragment>

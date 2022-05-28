@@ -46,6 +46,12 @@ var SchemaInfo = require('./schema/schemaInfo.js');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const multer = require('multer');
+const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
+
+const fs = require("fs");
+const { constants } = require('buffer');
+const { LiveTvOutlined } = require('@material-ui/icons');
+
 
 mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -218,12 +224,17 @@ app.get('/photosOfUser/:id', function (request, response) {
 
 app.post('/admin/login', function (request, response) {
     const loginName = request.body.login_name; 
+    const password = request.body.password; 
     User.findOne({login_name: loginName}).exec((err, user) => {
         if (err || !user) {
             console.log('User with login_name:' + loginName + ' not found.');
             response.status(400).send('User with login name not found');
             return; 
         }
+        //if (user.password !== password) {
+        //    response.status(400).send('Password incorrect.');
+        //    return;
+        //}
         //mark session as being logged in 
         request.session.user_id = user._id;
         request.session.login_name = loginName;
@@ -258,13 +269,22 @@ app.post('/commentsOfPhoto/:photo_id', function(request, response) {
         response.status(400).send('Invalid comment');
         return;
     }
-    //search through database to find photo
-    Photo.findOne({_id: request.params.photo_id}, function(err, photo) {
-        if (err) {
-            response.status(400).send('');
+    const id = request.params.photo_id;
+    Photo.findOne({_id: id}, function(err, photo) {
+        if (err || !photo) {
+            console.log('Photo not found.');
+            response.status(400).send('Photo not found.');
+            return; 
         }
-    })
-})
+        photo.comments.push({
+            comment: comment_text,
+            user_id: session_userID,
+        });
+        photo.save();
+        response.status(200).send();
+    });
+
+});
 //ability to upload photos 
 app.post('/photos/new', function(request, response) {
     const session_userID = request.session.user_id;
@@ -272,14 +292,70 @@ app.post('/photos/new', function(request, response) {
         response.status(401).send('Invalid user');
         return;
     }
-})
+    processFormBody(request, response, function (err) {
+        if (err || !request.file) {
+            return;
+        }
+    
+        const timestamp = new Date().valueOf();
+        const filename = 'U' +  String(timestamp) + request.file.originalname;
+    
+        fs.writeFile("./images/" + filename, request.file.buffer, function (err) {
+            if (err) {
+                response.status(400).send("Could not write file");
+            }
+            Photo.create({
+                    file_name: filename,
+                    user_id: session_userID,
+                    date_time: timestamp,
+                    comments: [],
+                }, 
+                function(err, photo) {
+                    if (err) {
+                        response.status(400).send(JSON.stringify(err));
+                        return;
+                    } 
+                    photo.save();
+                    response.status(200).send();
+                }
+            )
+        });
+    });
+
+});
 //ability to register 
 app.post('/user', function(request, response) {
-    const session_userID = request.session.user_id;
-    if (!session_userID) {
-        response.status(401).send('Invalid user');
-        return;
+    const password = request.body.password;
+    if (password.length() === 0) {
+        response.status(400).send('Password cannot be empty.')
+        return; 
     }
+    const loginName = request.body.login_name;
+    User.findOne({login_name: loginName}, function(err, user) {
+        if (err) {
+            response.status(400).send('Username verification failed.');
+            return;
+        }
+        if (user.length >= 0) {
+            response.status(400).send('Username already exists.');
+            return;
+        }
+
+        const firstName = request.body.first_name;
+        const lastName = request.body.last_name;
+        const location = request.body.location;
+        const description = request.body.description;
+        const occupation = request.body.occupation;
+
+        User.create(loginName, password, firstName, lastName, location, description, occupation, function(err) {
+            if (err) {
+                response.status(400).send(JSON.stringify(error));
+                return;
+            }
+            response.status(200).send('User registeration successful.')
+        })
+
+    })
 })
 
 var server = app.listen(3000, function () {

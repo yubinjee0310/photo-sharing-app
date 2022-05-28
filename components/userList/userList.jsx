@@ -22,13 +22,18 @@ class UserList extends React.Component {
   }
 
   componentDidMount() {
-    axios.get(`/user/list`).then((res) => {
-      this.setState({
-        userList: res.data,
+    if (this.props.loginStatus) {
+      axios.get(`/user/list`).then((res) => {
+        this.setState({
+          userList: res.data,
+        });
+      }).catch((error) => {
+        this.setState({
+          userList: [],
+        });
+        console.log(error);
       });
-    }).catch((error) => {
-      console.log(error);
-    });
+    }
   }
 
   componentDidUpdate(prevProps) {
