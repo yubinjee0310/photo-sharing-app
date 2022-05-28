@@ -231,10 +231,10 @@ app.post('/admin/login', function (request, response) {
             response.status(400).send('User with login name not found');
             return; 
         }
-        //if (user.password !== password) {
-        //    response.status(400).send('Password incorrect.');
-        //    return;
-        //}
+        if (user.password !== password) {
+            response.status(400).send('Password incorrect.');
+            return;
+        }
         //mark session as being logged in 
         request.session.user_id = user._id;
         request.session.login_name = loginName;

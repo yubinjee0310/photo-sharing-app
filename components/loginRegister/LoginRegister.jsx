@@ -5,15 +5,17 @@ class LoginRegister extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loginName: '',
             failed: false,
+            loginName: '',
             password: '',
         };
         this.tellStatus = props.tellStatus;
     }
 
     handleChange(event) { //keep track of whatever text in loginName 
-        this.setState({loginName: event.target.value});
+        this.setState({
+            [event.target.name]: event.target.value,
+        });
     }
 
     handleLogin(event) {
@@ -50,7 +52,14 @@ class LoginRegister extends React.Component {
                     <label>
                         Login Name: <input type="text" 
                                         value={this.state.loginName} 
-                                        onChange={e => this.handleChange(e)}/>   
+                                        onChange={e => this.handleChange(e)}
+                                        name="loginName"/>   
+                    </label>
+                    <label>
+                        Password: <input type="password" 
+                                        value={this.state.password} 
+                                        onChange={e => this.handleChange(e)}
+                                        name="password"/>  
                     </label>
                     <input type="submit" value="Submit" />
                     <p>
