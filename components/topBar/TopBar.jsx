@@ -5,8 +5,6 @@ import {
 import './TopBar.css';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import axios from 'axios';
-import StateManager from '../../lib/stateManager';
-import { ThreeSixtyTwoTone } from '@material-ui/icons';
 
 /**
  * Define TopBar, a React componment of CS142 project #5
@@ -50,7 +48,7 @@ class TopBar extends React.Component {
   }
 
   handleLogout() {
-    axios.post("/admin/logout", {}).then((response) => {
+    axios.post("/admin/logout", {}).then(() => {
       this.tellStatus(false, "", "");
     });
   }
@@ -67,7 +65,7 @@ class TopBar extends React.Component {
         })
         .catch(err => console.log(`POST ERR: ${err}`));
  }
-}
+};
 
   render() {
     return (
@@ -81,7 +79,7 @@ class TopBar extends React.Component {
               Version: {this.state.version}
             </Typography>
             <Typography variant="h5" color="inherit">
-              {this.props.loginStatus ? 
+              {this.props.loginStatus ? (
                 <Switch>
                   <Route path="/users/:userId">
                     {`${this.state.user.first_name} ${this.state.user.last_name}`}
@@ -90,17 +88,15 @@ class TopBar extends React.Component {
                     Photos of {`${this.state.user.first_name} ${this.state.user.last_name}`}
                   </Route>
                 </Switch>
-              :
-                "Please log in"
-              }
+              ) :
+                "Please log in"}
             </Typography>
-            {this.props.loginStatus ? 
-              <Button variant="contained" onClick={e => this.handleLogout()}>
+            {this.props.loginStatus ? (
+              <Button variant="contained" onClick={() => this.handleLogout()}>
                 Log Out
               </Button>
-              :
-              null
-            }
+            ):
+              null }
             {
               this.props.loginStatus && (
               <input 
@@ -110,14 +106,14 @@ class TopBar extends React.Component {
                    this.uploadInput = domFileRef; 
                 }} 
               />
-            )}
-            {this.props.loginStatus ? 
+              )
+            }
+            {this.props.loginStatus ? (
               <Button variant="contained" onClick={() => this.handleUploadButtonClicked()}>
                 Add Photo
               </Button>
-              :
-              null
-            }
+            ):
+              null}
           </Toolbar>
         </AppBar>
       </HashRouter>

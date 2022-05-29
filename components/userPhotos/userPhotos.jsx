@@ -8,7 +8,6 @@ import './userPhotos.css';
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import AddComments from './addComments';
-import StateManager from '../../lib/stateManager';
 
 /**
  * Define UserPhotos, a React componment of CS142 project #5
@@ -30,7 +29,9 @@ class UserPhotos extends React.Component {
     }
   }
   notifyEvent(eventType) {
-    this.reloadData();
+    if (eventType === 'photoupload') {
+      this.reloadData();
+    }
   }
   reloadData() {
     axios.get(`/photosOfUser/${this.props.match.params.userId}`).then((res) => {

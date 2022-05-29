@@ -4,7 +4,7 @@ import {
   HashRouter, Redirect, Route, Switch,
 } from 'react-router-dom';
 import {
-  Grid, Typography, Paper
+  Grid, Paper
 } from '@material-ui/core';
 import './styles/main.css';
 
@@ -45,39 +45,37 @@ class PhotoShare extends React.Component {
               <Route exact path="/">
                 <TopBar firstName={this.state.firstName} 
                         loginStatus={this.state.isLoggedIn} 
-                        tellStatus={(loggedStatus, userID, firstName) => 
-                          this.tellStatus(loggedStatus, userID, firstName)}
+                        tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
                         stateManager={this.stateManager} />
-                
               </Route>
               <Route path="/users/:userId"
-                  render={ props => <TopBar userId = {props.match.params.userId} 
-                                            firstName = {this.state.firstName}
-                                            loginStatus={this.state.isLoggedIn}
-                                            tellStatus={(loggedStatus, userID, firstName) => 
-                                               this.tellStatus(loggedStatus, userID, firstName)}
-                                            stateManager={this.stateManager}/>}
+                  render={ props => (
+                    <TopBar userId = {props.match.params.userId} 
+                            firstName = {this.state.firstName}
+                            loginStatus={this.state.isLoggedIn}
+                            tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
+                            stateManager={this.stateManager}/>
+                  )}
               />
               <Route path="/photos/:userId"
-                  render={ props => <TopBar userId = {props.match.params.userId}
-                                            firstName = {this.state.firstName}
-                                            loginStatus={this.state.isLoggedIn}
-                                            tellStatus={(loggedStatus, userID, firstName) =>
-                                               this.tellStatus(loggedStatus, userID, firstName)}
-                                            stateManager={this.stateManager}/>}
+                  render={ props => (
+                    <TopBar userId = {props.match.params.userId}
+                            firstName = {this.state.firstName}
+                            loginStatus={this.state.isLoggedIn}
+                            tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
+                            stateManager={this.stateManager}/>
+                  )}
                                             
               />
               <Route path="/users"> 
                 <TopBar firstName = {this.state.firstName}
                         loginStatus={this.state.isLoggedIn}
-                        tellStatus={(loggedStatus, userID, firstName) => 
-                          this.tellStatus(loggedStatus, userID, firstName)}
+                        tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
                         stateManager={this.stateManager}/>
               </Route>
               <Route path="/login-register"> 
                 <TopBar loginStatus={this.state.isLoggedIn}
-                        tellStatus={(loggedStatus, userID, firstName) => 
-                          this.tellStatus(loggedStatus, userID, firstName)}
+                        tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
                         stateManager={this.stateManager}/>
               </Route>
           </Switch>
@@ -98,18 +96,20 @@ class PhotoShare extends React.Component {
                 <Redirect exact path="/" to="/login-register" />
               }
               {
-                  this.state.isLoggedIn ?
+                  this.state.isLoggedIn ? (
                   <Route path="/users/:userId"
                   render={ props => <UserDetail {...props} /> }
                 />
+                )
                   :
                   <Redirect path="/users/:userId" to="/login-register" />
               }
               {
-                  this.state.isLoggedIn ?
+                  this.state.isLoggedIn ? (
                   <Route path="/photos/:userId"
                   render ={ props => <UserPhotos {...props} stateManager={this.stateManager}/> }
                 />
+                )
                   :
                   <Redirect path="/photos/:userId" to="/login-register" />
               }
@@ -122,13 +122,13 @@ class PhotoShare extends React.Component {
               {
                 this.state.isLoggedIn ?
                 <Redirect path="/login-register" to= {`/users/${this.state.userID}`}/>
-                :
+                : (
                 <Route path="/login-register"
-                  render={ props => 
-                    <LoginRegister tellStatus={(loggedStatus, userID, firstName) => 
-                                  this.tellStatus(loggedStatus, userID, firstName)}  />
-                  } />
-              }
+                  render={ () => (
+                    <LoginRegister tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}  />
+                  )} />
+              )
+}
             </Switch>
           </Paper>
         </Grid>

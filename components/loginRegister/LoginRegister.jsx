@@ -35,7 +35,7 @@ class LoginRegister extends React.Component {
             password: this.state.password,
         }).then((response) => {
             this.tellStatus(true, response.data._id, response.data.first_name);
-        }).catch((error) => {
+        }).catch(() => {
             this.setState({
                 failed: true,
             });
@@ -160,8 +160,7 @@ class LoginRegister extends React.Component {
                     </p>
                 </form>
             </React.Fragment>
-
-        )
+        );
     }
 }
 

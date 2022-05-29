@@ -39,9 +39,6 @@ var express = require('express');
 var app = express();
 
 // Load the Mongoose schema for User, Photo, and SchemaInfo
-var User = require('./schema/user.js');
-var Photo = require('./schema/photo.js');
-var SchemaInfo = require('./schema/schemaInfo.js');
 
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -49,8 +46,9 @@ const multer = require('multer');
 const processFormBody = multer({storage: multer.memoryStorage()}).single('uploadedphoto');
 
 const fs = require("fs");
-const { constants } = require('buffer');
-const { LiveTvOutlined } = require('@material-ui/icons');
+var SchemaInfo = require('./schema/schemaInfo.js');
+var Photo = require('./schema/photo.js');
+var User = require('./schema/user.js');
 
 
 mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -251,9 +249,9 @@ app.post('/admin/logout', function(request, response) {
     if (!sessionData.user_id) {
         response.status(400).send('Not logged in.');
     } else {
-        sessionData.destroy(function(err) {
+        sessionData.destroy(function() {
             response.status(200).send("Successfully logged out.");
-            return;
+            
         });
     }
 });
@@ -300,7 +298,7 @@ app.post('/photos/new', function(request, response) {
         const timestamp = new Date().valueOf();
         const filename = 'U' +  String(timestamp) + request.file.originalname;
     
-        fs.writeFile("./images/" + filename, request.file.buffer, function (err) {
+        fs.writeFile("./images/" + filename, request.file.buffer, function () {
             if (err) {
                 response.status(400).send("Could not write file");
             }
@@ -310,15 +308,15 @@ app.post('/photos/new', function(request, response) {
                     date_time: timestamp,
                     comments: [],
                 }, 
-                function(err, photo) {
-                    if (err) {
-                        response.status(400).send(JSON.stringify(err));
+                function(error, photo) {
+                    if (error) {
+                        response.status(400).send(JSON.stringify(error));
                         return;
                     } 
                     photo.save();
                     response.status(200).send();
                 }
-            )
+            );
         });
     });
 
@@ -366,17 +364,17 @@ app.post('/user', function(request, response) {
             location: location, 
             description: description, 
             occupation: occupation
-        }, function(err) {
-            if (err) {
-                response.status(400).send(JSON.stringify(err));
-                console.log(JSON.stringify(err));
+        }, function(error) {
+            if (error) {
+                response.status(400).send(JSON.stringify(error));
+                console.log(JSON.stringify(error));
                 return;
             }
-            response.status(200).send('User registration successful.')
-        })
+            response.status(200).send('User registration successful.');
+        });
 
-    })
-})
+    });
+});
 
 var server = app.listen(3000, function () {
     var port = server.address().port;
