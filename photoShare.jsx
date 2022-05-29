@@ -20,9 +20,9 @@ class PhotoShare extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoggedIn: false,
-      userID: '',
-      firstName: '',
+      isLoggedIn: localStorage.getItem('isLoggedIn'),
+      userID: localStorage.getItem('userID'),
+      firstName: localStorage.getItem('firstName'),
     };
     this.stateManager = new StateManager();
   }
@@ -33,6 +33,9 @@ class PhotoShare extends React.Component {
       userID: userID,
       firstName: firstName,
     });
+    localStorage.setItem('isLoggedIn', loggedStatus);
+    localStorage.setItem('userID', userID);
+    localStorage.setItem('firstName', firstName);
   }
  
   render() {
