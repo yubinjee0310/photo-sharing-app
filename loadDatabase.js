@@ -29,6 +29,7 @@ var cs142models = require('./modelData/photoApp.js').cs142models;
 var User = require('./schema/user.js');
 var Photo = require('./schema/photo.js');
 var SchemaInfo = require('./schema/schemaInfo.js');
+var Password = require('./cs142password.js');
 
 var versionString = '1.0';
 
@@ -44,6 +45,7 @@ Promise.all(removePromises).then(function () {
     var userModels = cs142models.userListModel();
     var mapFakeId2RealId = {}; // Map from fake id to real Mongo _id
     var userPromises = userModels.map(function (user) {
+        const password_obj = Password.makePasswordEntry('weak');
         return User.create({
             first_name: user.first_name,
             last_name: user.last_name,
@@ -51,7 +53,8 @@ Promise.all(removePromises).then(function () {
             description: user.description,
             occupation: user.occupation,
             login_name: user.last_name.toLowerCase(),
-            password: 'weak'
+            password_digest: password_obj.hash, 
+            salt: password_obj.salt,
         }).then(function (userObj) {
             // Set the unique ID of the object. We use the MongoDB generated _id for now
             // but we keep it distinct from the MongoDB ID so we can go to something

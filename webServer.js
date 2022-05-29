@@ -49,7 +49,7 @@ const fs = require("fs");
 var SchemaInfo = require('./schema/schemaInfo.js');
 var Photo = require('./schema/photo.js');
 var User = require('./schema/user.js');
-
+var Password = require('./cs142password.js');
 
 mongoose.connect('mongodb://localhost/cs142project6', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -229,7 +229,7 @@ app.post('/admin/login', function (request, response) {
             response.status(400).send('User with login name not found');
             return; 
         }
-        if (user.password !== password) {
+        if (!Password.doesPasswordMatch(user.password_digest, user.salt, password)) {
             response.status(400).send('Password incorrect.');
             return;
         }
@@ -356,9 +356,11 @@ app.post('/user', function(request, response) {
             response.status(400).send('Username already exists.');
             return;
         }
+        const hashRegisteredPass = Password.makePasswordEntry(registrationPass);
         User.create({
             login_name: loginName, 
-            password: registrationPass, 
+            password_digest: hashRegisteredPass.hash, 
+            salt: hashRegisteredPass.salt, 
             first_name: firstName, 
             last_name: lastName, 
             location: location, 
