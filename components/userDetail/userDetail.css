@@ -1,3 +1,16 @@
 .name, .location, .occupation, .photos {
     padding-bottom: 20px;
 }
+
+.mentioned-photo {
+    margin-top: 10px; 
+    display: flex;
+    align-items: center;
+}
+.photo-thumbnail {
+    margin: 10px; 
+}
+h5.mentioned-photos-title {
+    margin-top: 50px; 
+    margin-bottom: 20px; 
+}

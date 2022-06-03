@@ -263,25 +263,27 @@ app.post('/commentsOfPhoto/:photo_id', function(request, response) {
         return;
     }
     const comment_text = request.body.comment;
+    const mentioned_users = JSON.parse(request.body.mentioned); 
+    console.log(request.body.mentioned);
+    console.log(mentioned_users);
     if (!comment_text) {
         response.status(400).send('Invalid comment');
         return;
     }
     const id = request.params.photo_id;
-    Photo.findOne({_id: id}, function(err, photo) {
+    const commentsObject = {
+        comment: comment_text,
+        user_id: session_userID,
+    };
+    Photo.findByIdAndUpdate(id, {$push: {comments: commentsObject,
+                                         mentioned: {$each: mentioned_users}}}).exec((err, photo) => {
         if (err || !photo) {
             console.log('Photo not found.');
             response.status(400).send('Photo not found.');
             return; 
         }
-        photo.comments.push({
-            comment: comment_text,
-            user_id: session_userID,
-        });
-        photo.save();
         response.status(200).send();
     });
-
 });
 //ability to upload photos 
 app.post('/photos/new', function(request, response) {
@@ -378,9 +380,96 @@ app.post('/user', function(request, response) {
     });
 });
 
+//PROJECT 8
+//MENTION STORY: if user is mentioned, add them to the array 
+app.post('/mentionsInPhoto/:photo_id', function(request, response) {
+    console.log("test print print");
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('User is not logged in.');
+        return;
+    }
+    const comment_text = request.session.comment;
+    if (!comment_text) {
+        response.status(400).send('Invalid comment');
+        return;
+    }
+    const photo_id = request.params.photo_id;
+    console.log(request.body.users_mentioned);
+    const users_mentioned = JSON.parse(request.body.users_mentioned); 
+    console.log(users_mentioned);
+    Photo.findOne({_id: photo_id}, function(err, photo) {
+        if (err) {
+            response.status(400).send(JSON.stringify(error));
+            console.log(JSON.stringify(error));
+            return;
+        }
+        if (photo === null) {
+            response.status(400).send('Photo was not found.');
+            return;
+        }
+        for (let i=0; i < users_mentioned.length; i++) {
+            if (!photo.mentioned.includes(users_mentioned[i])) {
+                photo.mentioned.push(users_mentioned[i]);
+            }
+        }
+        photo.save();
+        response.status(200).send('Successfully added users mentioned to photo');
+    });
+});
+//MENTION STORY: if user is mentioned, get photos they are mentioned in 
+app.get('/mentionsInPhoto/:user_id', function(request, response) {
+    console.log("mention of photo request received");
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('User is not logged in.');
+        return;
+    }
+    const user_id = request.params.user_id; 
+    Photo.find({}, function(err, photos) {
+        if (err) {
+            response.status(400).send(JSON.stringify(error));
+            console.log(JSON.stringify(error));
+            return;
+        }
+        if (!photos) {
+            response.status(400).send('Photos not found.');
+            return;
+        } 
+        const mentioned_photos = [];
+        const photosArray = JSON.parse(JSON.stringify(photos));
+        async.each(photosArray, function(photo, photos_done) {
+            if (photo.mentioned.includes(user_id)) {
+                console.log("async test")
+                User.findOne({_id: photo.user_id}).select('first_name last_name')
+                                                          .exec((errorUser, user) => {
+                    console.log("inside user.findone")
+                    if (errorUser || !user) {
+                        console.log('User with _id:' + photo.user_id + ' not found.');
+                        photos_done(errorUser);
+                        return;
+                    }
+                    photo.first_name = user.first_name;
+                    photo.last_name = user.last_name;
+                    mentioned_photos.push(photo);
+                    photos_done();
+                });
+            } else {
+                photos_done();
+            }
+        }, function(errorUser) { 
+            console.log(errorUser);
+            if (errorUser) {
+                response.status(400).send(errorUser);
+            } else {
+                response.status(200).send(mentioned_photos);
+            }
+        });
+    });
+})
+
 var server = app.listen(3000, function () {
     var port = server.address().port;
     console.log('Listening at http://localhost:' + port + ' exporting the directory ' + __dirname);
 });
-
 

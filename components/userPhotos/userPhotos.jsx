@@ -18,15 +18,31 @@ class UserPhotos extends React.Component {
     this.state = {
       photos: [],
     };
+    this.didScroll = false; 
     this.props.stateManager.register(this, "photoupload");
+  }
+  tryScroll() {
+    if (this.props.location && !this.didScroll) {
+      const params = new URLSearchParams(this.props.location.search);
+      const photo_id = params.get('scrolled-photo-id')
+      if (photo_id !== null) {
+        const elem = document.getElementById(photo_id);
+        if (elem) {
+          elem.scrollIntoView();
+          this.didScroll = true; 
+        }
+      }
+    }
   }
   componentDidMount() {
     this.reloadData();
+    this.tryScroll();
   }
   componentDidUpdate(prevProps) {
     if (this.props.match.params.userId !== prevProps.match.params.userId) {
       this.reloadData();
     }
+    this.tryScroll();
   }
   notifyEvent(eventType) {
     if (eventType === 'photoupload') {
@@ -39,14 +55,15 @@ class UserPhotos extends React.Component {
         photos: res.data,
       });
     }).catch((error) => {
-      console.log(error);
+      console.log(error);  
     });
   }
+
   render() {
     return (
         <React.Fragment>
           {this.state.photos.map(photo => (
-            <React.Fragment key={photo._id}>
+            <div className="photo" key={photo._id} id={photo._id}>
               {/*image display */}
               <Card>
                   <CardMedia  
@@ -79,7 +96,7 @@ class UserPhotos extends React.Component {
                   </div>
               ))}
               <AddComments photoID={photo._id} reloadData={() => this.reloadData()} />
-            </React.Fragment>
+            </div>
           ))}
         </React.Fragment>
     );

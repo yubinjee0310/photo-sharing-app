@@ -1,3 +1,12 @@
 .comment {
     margin-bottom: 15px;
 }
+
+.photo {
+    margin-bottom: 30px;
+    max-width: 500px;
+}
+
+.new_mention_comment {
+    border: none;
+}
