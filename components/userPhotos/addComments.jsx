@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { MentionsInput, Mention } from 'react-mentions'
+import { MentionsInput, Mention } from 'react-mentions';
 import './addComments.css';
 
 class AddComments extends React.Component {

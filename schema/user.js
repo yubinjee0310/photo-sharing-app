@@ -16,6 +16,7 @@ var userSchema = new mongoose.Schema({
     login_name: String,      // Login Name
     password_digest: String, // Hash of password
     salt: String, // Salt for password
+    favorites: [mongoose.Schema.Types.ObjectId], //favorited photos' ids
 });
 
 // the schema is useless so far

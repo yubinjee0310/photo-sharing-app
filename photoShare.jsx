@@ -15,6 +15,7 @@ import UserDetail from './components/userDetail/userDetail';
 import UserList from './components/userList/userList';
 import UserPhotos from './components/userPhotos/userPhotos';
 import StateManager from './lib/stateManager';
+import Favorites from './components/favorites/Favorites';
 
 class PhotoShare extends React.Component {
   constructor(props) {
@@ -81,6 +82,12 @@ class PhotoShare extends React.Component {
                         tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
                         stateManager={this.stateManager}/>
               </Route>
+              <Route path="/favorites"> 
+                <TopBar firstName = {this.state.firstName}
+                        loginStatus={this.state.isLoggedIn}
+                        tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}
+                        stateManager={this.stateManager}/>
+              </Route>
           </Switch>
         </Grid>
         <div className="cs142-main-topbar-buffer"/>
@@ -130,8 +137,17 @@ class PhotoShare extends React.Component {
                   render={ () => (
                     <LoginRegister tellStatus={(loggedStatus, userID, firstName) => this.tellStatus(loggedStatus, userID, firstName)}  />
                   )} />
-              )
-}
+                  )
+              }
+              {
+                  this.state.isLoggedIn ? (
+                  <Route path="/favorites"
+                  render={ props => <Favorites {...props} /> }
+                />
+                )
+                  :
+                  <Redirect path="/favorites" to="/login-register" />
+              }
             </Switch>
           </Paper>
         </Grid>

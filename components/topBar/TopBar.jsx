@@ -3,7 +3,7 @@ import {
   AppBar, Toolbar, Typography, Button,
 } from '@material-ui/core';
 import './TopBar.css';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { Link, HashRouter, Route, Switch } from 'react-router-dom';
 import axios from 'axios';
 
 /**
@@ -112,6 +112,12 @@ class TopBar extends React.Component {
               <Button variant="contained" onClick={() => this.handleUploadButtonClicked()}>
                 Add Photo
               </Button>
+            ):
+              null}
+            {this.props.loginStatus ? (
+              <Link to="/favorites">
+                <Button variant="contained">Favorites</Button>
+              </Link>
             ):
               null}
           </Toolbar>

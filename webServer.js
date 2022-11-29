@@ -400,8 +400,8 @@ app.post('/mentionsInPhoto/:photo_id', function(request, response) {
     console.log(users_mentioned);
     Photo.findOne({_id: photo_id}, function(err, photo) {
         if (err) {
-            response.status(400).send(JSON.stringify(error));
-            console.log(JSON.stringify(error));
+            response.status(400).send(JSON.stringify(err));
+            console.log(JSON.stringify(err));
             return;
         }
         if (photo === null) {
@@ -419,7 +419,6 @@ app.post('/mentionsInPhoto/:photo_id', function(request, response) {
 });
 //MENTION STORY: if user is mentioned, get photos they are mentioned in 
 app.get('/mentionsInPhoto/:user_id', function(request, response) {
-    console.log("mention of photo request received");
     const session_userID = request.session.user_id;
     if (!session_userID) {
         response.status(401).send('User is not logged in.');
@@ -428,8 +427,8 @@ app.get('/mentionsInPhoto/:user_id', function(request, response) {
     const user_id = request.params.user_id; 
     Photo.find({}, function(err, photos) {
         if (err) {
-            response.status(400).send(JSON.stringify(error));
-            console.log(JSON.stringify(error));
+            response.status(400).send(JSON.stringify(err));
+            console.log(JSON.stringify(err));
             return;
         }
         if (!photos) {
@@ -440,10 +439,8 @@ app.get('/mentionsInPhoto/:user_id', function(request, response) {
         const photosArray = JSON.parse(JSON.stringify(photos));
         async.each(photosArray, function(photo, photos_done) {
             if (photo.mentioned.includes(user_id)) {
-                console.log("async test")
                 User.findOne({_id: photo.user_id}).select('first_name last_name')
                                                           .exec((errorUser, user) => {
-                    console.log("inside user.findone")
                     if (errorUser || !user) {
                         console.log('User with _id:' + photo.user_id + ' not found.');
                         photos_done(errorUser);
@@ -466,7 +463,72 @@ app.get('/mentionsInPhoto/:user_id', function(request, response) {
             }
         });
     });
-})
+});
+//Favorite list of photos story 
+//Returning all the favorited photos of user 
+app.get('/favorites', function(request, response) {
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('User is not logged in.');
+        return;
+    }
+    User.findOne({_id: session_userID}).exec((err, user) => {
+        if (err || !user) {
+            response.status(400).send(JSON.stringify(err));
+            console.log(JSON.stringify(err));
+            return;
+        }
+        const favorited_photos_array = [];
+        async.each(user.favorites, function(photo_id, favorited_photos_done) {
+            Photo.findOne({_id: photo_id}).exec((errorFavoritePhoto, photo) => {
+                if (errorFavoritePhoto || !photo) {
+                    console.log('Photo with _id:' + photo_id + ' not found.');
+                    favorited_photos_done(errorFavoritePhoto);
+                    return;
+                }
+                favorited_photos_array.push(photo);
+                favorited_photos_done();
+            });
+        }, function(errorPhoto) { 
+            if (errorPhoto) {
+                response.status(400).send(errorPhoto);
+            } else {
+                response.status(200).send(favorited_photos_array);
+            }
+        });
+    });
+});
+
+//allow user to favorite and unfavorite photos 
+app.post('/favorites', function(request, response) {
+    const session_userID = request.session.user_id;
+    if (!session_userID) {
+        response.status(401).send('User is not logged in.');
+        return;
+    }
+    const photo_id = request.body.photo_id; 
+    const isFavorite = request.body.isFavorite;
+    if (isFavorite) {
+        User.findByIdAndUpdate(session_userID, {$push: {favorites: photo_id}}).exec((err, user) => {
+            if (err || !user) {
+                console.log('User not found.');
+                response.status(400).send('User not found.');
+                return; 
+            }
+            response.status(200).send();
+        });
+    } else {
+        User.findByIdAndUpdate(session_userID, {$pull: {favorites: photo_id}}).exec((err, user) => {
+            if (err || !user) {
+                console.log('User not found.');
+                response.status(400).send('User not found.');
+                return; 
+            }
+            response.status(200).send();
+        });
+    }
+});
+
 
 var server = app.listen(3000, function () {
     var port = server.address().port;

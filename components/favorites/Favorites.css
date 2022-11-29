@@ -1,0 +1,22 @@
+.favorited-photo {
+    margin: 40px;
+    max-width: 300px;
+}
+
+.background-blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+}
+
+.modal-dialog {
+    top: 100px;
+}
+
+.date-caption {
+    text-align: center; 
+}

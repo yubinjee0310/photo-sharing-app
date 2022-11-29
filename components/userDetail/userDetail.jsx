@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Typography, Button, Avatar, Card
+  Typography, Avatar, Card
 } from '@material-ui/core';
 import './userDetail.css';
 import { Link } from "react-router-dom";
@@ -74,12 +74,13 @@ class UserDetail extends React.Component {
           <Typography variant="subtitle1" className="photos">
           <strong>Description: </strong>{`${user.description}`}
           </Typography>
-          <Link to={`/photos/${user._id}`}>Photos of {`${this.state.user.first_name} 
-                                                     ${this.state.user.last_name}`}</Link>
+          <Link className="photo-view-link" to={`/photos/${user._id}`}>Photos of {`${this.state.user.first_name} 
+                                                     ${this.state.user.last_name}`}
+          </Link>
         </Card>
         <Card>
           {
-            mentionedPhotos.length > 0 ?
+            mentionedPhotos.length > 0 ? (
               <React.Fragment>
                 <Typography variant="h5" className="mentioned-photos-title">Mentioned photos</Typography>
                 {
@@ -92,7 +93,8 @@ class UserDetail extends React.Component {
                             </Link>
                             <Typography>
                               Posted By <Link to={`/users/${photo.user_id}`}>{`${photo.first_name} 
-                                                      ${photo.last_name}`}</Link>
+                                                   ${photo.last_name}`}
+                                        </Link>
                             </Typography>
                         </div>
                       </React.Fragment>
@@ -100,13 +102,16 @@ class UserDetail extends React.Component {
                   })
                 }
               </React.Fragment>
+            )
             :
-              <Typography variant="subtitle1">
+            (
+              <Typography className="not-mentioned" variant="subtitle1"> 
                 This user has not been mentioned in any photo. 
               </Typography>
+            )
           }
         </Card>
-      </React.Fragment>
+    </React.Fragment>
     );
   }
 }

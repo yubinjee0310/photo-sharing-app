@@ -2,7 +2,8 @@ import React from 'react';
 import {
   Card,
   CardMedia,
-  Typography
+  Typography,
+  Button,
 } from '@material-ui/core';
 import './userPhotos.css';
 import { Link } from "react-router-dom";
@@ -17,6 +18,7 @@ class UserPhotos extends React.Component {
     super(props);
     this.state = {
       photos: [],
+      favorites: [],
     };
     this.didScroll = false; 
     this.props.stateManager.register(this, "photoupload");
@@ -24,7 +26,7 @@ class UserPhotos extends React.Component {
   tryScroll() {
     if (this.props.location && !this.didScroll) {
       const params = new URLSearchParams(this.props.location.search);
-      const photo_id = params.get('scrolled-photo-id')
+      const photo_id = params.get('scrolled-photo-id');
       if (photo_id !== null) {
         const elem = document.getElementById(photo_id);
         if (elem) {
@@ -57,9 +59,26 @@ class UserPhotos extends React.Component {
     }).catch((error) => {
       console.log(error);  
     });
+    axios.get(`/favorites`).then(res => {
+      this.setState({
+        favorites: res.data,
+      });
+    }).catch(error => {
+      console.log(error.res.data);
+    });
   }
-
+  handleFavoriteButton(currPhotoID) {
+    axios.post(`/favorites`, {
+      photo_id: currPhotoID,
+      isFavorite: true,
+    }).then(() => {
+       this.reloadData();
+    }).catch(error => {
+      console.log(error);
+    });
+ }
   render() {
+    const favorited = this.state.favorites.map(photo => photo._id); 
     return (
         <React.Fragment>
           {this.state.photos.map(photo => (
@@ -73,13 +92,27 @@ class UserPhotos extends React.Component {
                   />
               </Card>
               {/*date/time of photo display */}
-              <Typography variant = "body1">
-                Photo was Posted: {photo.date_time}
-              </Typography>
+              <div className="firstLine">
+                <Typography variant="body1">
+                  Photo was Posted: {photo.date_time}
+                </Typography>
+                {!favorited.includes(photo._id) ? 
+                  (
+                  <Button variant="contained" onClick={() => this.handleFavoriteButton(photo._id)}>
+                    ❤️ Favorite  
+                  </Button> 
+                  )
+                :
+                (
+                  <Typography>
+                    ✅ Favorited 
+                  </Typography>
+                )}
+              </div>
               {photo.comments && (
                 <Typography variant="body2">
                   Comments:
-                </Typography>
+                </Typography> 
               )}
               {/*comment display */}
               {photo.comments && photo.comments.map(commentObject => (

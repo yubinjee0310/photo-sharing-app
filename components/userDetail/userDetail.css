@@ -14,3 +14,8 @@ h5.mentioned-photos-title {
     margin-top: 50px; 
     margin-bottom: 20px; 
 }
+
+.photo-view-link {
+    margin-bottom: 15px; 
+    display: block;
+}
